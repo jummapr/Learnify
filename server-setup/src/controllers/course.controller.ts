@@ -307,3 +307,122 @@ export const addAnswer = catchAsyncError(
     }
   }
 );
+
+// add review in course
+
+interface IAddReviewData {
+  review: string;
+  courseId: string;
+  rating: number;
+  userId: string;
+}
+
+export const addReview = catchAsyncError(
+  async (req: IGetUserAuthInfoRequest, res: Response, next: NextFunction) => {
+    try {
+      const userCourseList = req.user.courses;
+
+      const courseId = req.params.id;
+
+      // if check courseId is already exist in userCourseList based on _id
+
+      const courseExist = userCourseList?.some(
+        (course: any) => course._id.toString() === courseId.toString()
+      );
+
+      if (!courseExist) {
+        return next(
+          new ErrorHandler("You are not eligible to access this course", 404)
+        );
+      }
+
+      const course = await courseModal.findById(courseId);
+
+      const { review, rating } = req.body as IAddReviewData;
+
+      const reviewData: any = {
+        user: req.user,
+        comment: review,
+        rating,
+      };
+
+      course.reviews.push(reviewData);
+
+      let avg = 0;
+
+      course.reviews.forEach((rev: any) => {
+        avg += rev.rating;
+      });
+
+      if (course) {
+        course.ratings = avg / course?.reviews.length;
+      }
+
+      await course.save();
+
+      const notification = {
+        title: "New Review Received.",
+        message: `${req.user?.name} has given in ${course?.name}`,
+      };
+
+      // create notification
+
+      res.status(200).json({
+        success: true,
+        course,
+      });
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }
+);
+
+// add replay on review --- only Admin can replay
+interface IAddReviewReplayData {
+  comment: string;
+  courseId: string;
+  reviewId: string;
+}
+export const addReplayToReview = catchAsyncError(
+  async (req: IGetUserAuthInfoRequest, res: Response, next: NextFunction) => {
+    try {
+      const { comment, courseId, reviewId }: IAddReviewReplayData = req.body;
+
+      const course = await courseModal.findById(courseId);
+
+      if (!course) {
+        return next(new ErrorHandler("Invalid course id", 404));
+      }
+
+      const review = course?.reviews?.find(
+        (rev: any) => rev._id.toString() === reviewId
+      );
+
+      if(!review) {
+        return next(new ErrorHandler("Review Not found", 404));
+      };
+
+      const replayData: any ={
+        user: req.user,
+        comment
+      };
+
+      if(!review.commentReplies) {
+        review.commentReplies = [];
+      }
+
+      review.commentReplies.push(replayData);
+
+      await course?.save();
+
+      res.status(200).json({
+        success: true,
+        course
+      })
+
+
+    } catch (error: any) {
+      return next(new ErrorHandler(error.message, 500));
+    }
+  }
+);
