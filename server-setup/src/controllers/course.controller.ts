@@ -11,6 +11,7 @@ import mongoose from "mongoose";
 import path from "path";
 import ejs from "ejs";
 import sendMail from "../utils/sendMail";
+import notificationModel from "../models/notification.model";
 
 // upload course
 export const uploadCourse = catchAsyncError(
@@ -211,6 +212,12 @@ export const addQuestion = catchAsyncError(
       // add this question to our course content
       courseContent.questions.push(newQuestions);
 
+      await notificationModel.create({
+        user:req.user?._id,
+        title: "New Question Received",
+        message: `You have a new question in ${courseContent?.title}`,
+      });
+
       // save the update course
 
       await course.save();
@@ -276,6 +283,11 @@ export const addAnswer = catchAsyncError(
 
       if (req.user?._id === question.user?._id) {
         // create notification
+        await notificationModel.create({
+          user:req.user?._id,
+          title: "New Question replay Received",
+          message: `You have a new question replay in ${courseContent?.title}`,
+        });
       } else {
         const data = {
           name: question.user.name,
