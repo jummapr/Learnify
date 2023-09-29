@@ -13,6 +13,7 @@ import ejs from "ejs";
 import sendMail from "../utils/sendMail";
 import { IGetUserAuthInfoRequest } from "../middleware/auth";
 import { newOrderServices } from "../services/order.service";
+import cron from "node-cron";
 
 // create order
 
@@ -99,3 +100,18 @@ export const createOrder = catchAsyncError(
     }
   }
 );
+
+// delete notification --- Only Admin
+
+cron.schedule("0 0 0 * * *", async () => {
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+  await notificationModel.deleteMany({
+    status: "read",
+    createdAt: { $lt: thirtyDaysAgo },
+  });
+
+  console.log("Deleted 30 days old notifications");
+});
+
+

@@ -28,3 +28,10 @@ export const getUserById = async (id: string, res: Response) => {
     });
   }
 };
+
+// Get All Users
+
+export const getAllUsers = async (res:Response) => {
+  const users = await userModal.find().sort({createdAt: -1});
+
+}
