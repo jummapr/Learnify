@@ -31,7 +31,21 @@ export const getUserById = async (id: string, res: Response) => {
 
 // Get All Users
 
-export const getAllUsers = async (res:Response) => {
+export const getAllUsersServices = async (res:Response) => {
   const users = await userModal.find().sort({createdAt: -1});
 
+  res.status(200).json({
+    success: true,
+    users
+  })
+}
+
+// user update the role -- only for admin
+export const updateUserRoleServices = async (res:Response, id: string , role: string) => {
+  const user = await userModal.findByIdAndUpdate(id, {role},{new: true});
+
+  res.status(200).json({
+    success: true,
+    user
+  })
 }

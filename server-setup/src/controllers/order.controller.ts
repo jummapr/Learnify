@@ -12,7 +12,7 @@ import path from "path";
 import ejs from "ejs";
 import sendMail from "../utils/sendMail";
 import { IGetUserAuthInfoRequest } from "../middleware/auth";
-import { newOrderServices } from "../services/order.service";
+import { getAllOrdersServices, newOrderServices } from "../services/order.service";
 import cron from "node-cron";
 
 // create order
@@ -113,5 +113,17 @@ cron.schedule("0 0 0 * * *", async () => {
 
   console.log("Deleted 30 days old notifications");
 });
+
+
+// get All orders --- admin only
+export const getAllOrders = catchAsyncError(
+  async (req: IGetUserAuthInfoRequest, res: Response, next: NextFunction) => {
+    try {
+      getAllOrdersServices(res);
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  }
+);
 
 

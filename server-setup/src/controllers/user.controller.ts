@@ -15,7 +15,11 @@ import {
 } from "../utils/jwt";
 import { redis } from "../utils/redis";
 import { IGetUserAuthInfoRequest } from "../middleware/auth";
-import { getUserById } from "../services/user.service";
+import {
+  getAllUsersServices,
+  getUserById,
+  updateUserRoleServices,
+} from "../services/user.service";
 
 // register users
 
@@ -446,13 +450,63 @@ export const updateProfilePicture = catchAsyncError(
 
       await user.save();
 
-      await redis.set(userId,JSON.stringify(user));
+      await redis.set(userId, JSON.stringify(user));
 
       res.status(200).json({
         success: true,
         user,
       });
-      
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  }
+);
+
+// get all users --- Only for admin
+
+export const getAllUsers = catchAsyncError(
+  async (req: IGetUserAuthInfoRequest, res: Response, next: NextFunction) => {
+    try {
+      getAllUsersServices(res);
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  }
+);
+
+// Update the user role -- only for admin
+export const updateUserRole = catchAsyncError(
+  async (req: IGetUserAuthInfoRequest, res: Response, next: NextFunction) => {
+    try {
+      const { id, role } = req.body;
+
+      updateUserRoleServices(res, id, role);
+    } catch (error) {
+      return next(new ErrorHandler(error.message, 400));
+    }
+  }
+);
+
+// Delete users  -- Only for admin
+export const deleteUser = catchAsyncError(
+  async (req: IGetUserAuthInfoRequest, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+
+      const user = await userModal.findById(id);
+
+      if (!user) {
+        return next(new ErrorHandler("User not found", 400));
+      }
+
+      await user.deleteOne({ id });
+
+      await redis.del(id);
+
+      res.status(200).json({
+        success: true,
+        message: "User deleted successfully.",
+      });
     } catch (error) {
       return next(new ErrorHandler(error.message, 400));
     }
