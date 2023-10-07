@@ -12,6 +12,7 @@ interface pageProps {
 const page: FC<pageProps> = ({}) => {
   const [open,setOpen] = useState(false);
   const [activeItem, setActiveItem] = useState(0);
+  const [route,setRoute] = useState("Login")
   return (
    <>
      <Heading 
@@ -23,11 +24,10 @@ const page: FC<pageProps> = ({}) => {
       open={open}
       setOpen={setOpen}
       activeItem={activeItem}
+      setRoute={setRoute}
+      route={route}
     />
     <Hero />
-    <div className='mt-11'>
-      <h1>Hello</h1>
-    </div>
     
    </>
     

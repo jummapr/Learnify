@@ -5,15 +5,21 @@ import Link from "next/link";
 import { FC, useState } from "react";
 import { ModeToggle } from "./ModeToggele";
 import { AlignJustify, UserCircle } from "lucide-react";
+import CustomModel from "@/utils/CustomModel";
+import Login from "./auth/Login";
+import SignUp from "./auth/SignUp";
+import Verification from "./auth/Verification";
 
 interface HeaderProps {
-  open: Boolean;
+  open: boolean;
   setOpen: (open: boolean) => void;
   activeItem: number;
+  route: string;
+  setRoute: (route: string) => void;
   
 }
 
-const Header: FC<HeaderProps> = ({ activeItem, open, setOpen,}) => {
+const Header: FC<HeaderProps> = ({ activeItem, open, setOpen,route,setRoute}) => {
   const [active, setActive] = useState(false);
   const [openSidebar, setOpenSidebar] = useState(false);
 
@@ -98,7 +104,60 @@ const Header: FC<HeaderProps> = ({ activeItem, open, setOpen,}) => {
           </div>
         )}
       </div>
-      
+          
+
+          {
+            route === "Login" && (
+              <>
+                {
+                  open && (
+                    <CustomModel 
+                      open={open}
+                      setOpen={setOpen}
+                      setRoute={setRoute}
+                      activeItem={activeItem}
+                      component={Login}
+                    />
+                  )
+                }
+              </>
+            )
+          }
+
+          {
+            route === "Sign-up" && (
+              <>
+                {
+                  open && (
+                    <CustomModel 
+                      open={open}
+                      setOpen={setOpen}
+                      setRoute={setRoute}
+                      activeItem={activeItem}
+                      component={SignUp}
+                    />
+                  )
+                }
+              </>
+            )
+          }
+          {
+            route === "Verification" && (
+              <>
+                {
+                  open && (
+                    <CustomModel 
+                      open={open}
+                      setOpen={setOpen}
+                      setRoute={setRoute}
+                      activeItem={activeItem}
+                      component={Verification}
+                    />
+                  )
+                }
+              </>
+            )
+          }
       
     </div>
   );
