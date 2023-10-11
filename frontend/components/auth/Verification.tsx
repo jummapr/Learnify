@@ -19,7 +19,7 @@ type VerifyNumber = {
 
 const Verification: FC<VerificationProps> = ({ setRoute }) => {
   const [invalidError, setInvalidError] = useState<boolean>(false);
-  const [verifyNumber, setVerifyNumber] = useState<VerifyNumber>({
+  const [verifyNumbers, setVerifyNumbers] = useState<VerifyNumber>({
     0: "",
     1: "",
     2: "",
@@ -37,15 +37,15 @@ const Verification: FC<VerificationProps> = ({ setRoute }) => {
   ];
 
   const verificationHandler = async () => {
-    console.log("test");
+    setInvalidError(true);
   };
   const handleInputChange = (index: number, value: string) => {
     setInvalidError(false);
     const newVerifyNumber = {
-      ...verifyNumber,
+      ...verifyNumbers,
       [index]: value,
     };
-    setVerifyNumber(newVerifyNumber);
+    setVerifyNumbers(newVerifyNumber);
 
     if (value === "" && index > 0) {
       inputRefs[index - 1].current?.focus();
@@ -63,10 +63,10 @@ const Verification: FC<VerificationProps> = ({ setRoute }) => {
       <br />
       <br />
       <div className=" m-auto flex items-center justify-center gap-x-2">
-        {Object.keys(verifyNumber).map((key, index) => (
+        {Object.keys(verifyNumbers).map((key, index) => (
           <>
             <input
-              type="text"
+              type="number"
               key={key}
               className={cn(
                 "w-[65px] h-[65px] bg-transparent border-[3px] rounded-[10px] flex items-center text-black dark:text-white justify-center text-[18px] font-Poppins outline-none text-center",
@@ -76,7 +76,7 @@ const Verification: FC<VerificationProps> = ({ setRoute }) => {
               )}
               placeholder=""
               maxLength={1}
-              value={verifyNumber[key as keyof VerifyNumber]}
+              value={verifyNumbers[key as keyof VerifyNumber]}
               onChange={(e) => handleInputChange(index,e.target.value)}
             />
           </>
