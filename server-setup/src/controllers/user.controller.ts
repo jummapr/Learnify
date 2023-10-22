@@ -95,7 +95,7 @@ export const createActivationToken = (user: any): IActivationToken => {
   function generateOTP() {
     const digits = "0123456789";
 
-    const otpLength = 6;
+    const otpLength = 4;
 
     let otp = "";
 

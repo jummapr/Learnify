@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useState,useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yop from "yup";
 import { Eye, EyeOff, Github } from "lucide-react";
@@ -6,6 +6,8 @@ import GoogleIcon from "@mui/icons-material/Google";
 import { styles } from "@/styles/style";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { useRegisterMutation } from "@/redux/features/auth/authApi";
+import toast from "react-hot-toast";
 
 interface SignUpProps {
   setRoute: (route: string) => void;
@@ -19,12 +21,33 @@ const schema = Yop.object().shape({
 
 const SignUp: FC<SignUpProps> = ({ setRoute }) => {
   const [show, setShow] = useState(false);
+  const [register, {isError,data,error,isSuccess,isLoading}] = useRegisterMutation();
+
+  useEffect(() => {
+    if(isSuccess) {
+      const message = data?.message || "Registration Successful";
+
+      toast.success(message);
+      setRoute("Verification");
+    }
+    if(error) {
+      if("data" in error) {
+        const errorData = error as any;
+        toast.error(errorData?.data.message)
+      }
+    }
+  }, [isSuccess,error]);
+  
 
   const formic = useFormik({
     initialValues: { name: "", email: "", password: "" },
     validationSchema: schema,
-    onSubmit: async ({ email, password }) => {
-      setRoute("Verification")
+    onSubmit: async ({ name,email, password }) => {
+      const data = {
+        name,email,password
+      };
+
+      await register(data);
     },
   });
 

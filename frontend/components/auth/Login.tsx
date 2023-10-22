@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useState,useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yop from "yup";
 import { Eye, EyeOff, Github } from "lucide-react";
@@ -6,9 +6,12 @@ import GoogleIcon from "@mui/icons-material/Google";
 import { styles } from "@/styles/style";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { useLoginMutation } from "@/redux/features/auth/authApi";
+import toast from "react-hot-toast";
 
 interface LoginProps {
   setRoute: (route: string) => void;
+  setOpen: (open:boolean) =>  void;
 }
 
 const schema = Yop.object().shape({
@@ -16,16 +19,32 @@ const schema = Yop.object().shape({
   password: Yop.string().min(6).required("Password is required"),
 });
 
-const Login: FC<LoginProps> = ({ setRoute }) => {
+const Login: FC<LoginProps> = ({ setRoute, setOpen }) => {
   const [show, setShow] = useState(false);
+  const [login, {isLoading,data,isSuccess,error}] = useLoginMutation()
 
   const formic = useFormik({
     initialValues: { email: "", password: "" },
     validationSchema: schema,
     onSubmit: async ({ email, password }) => {
-      console.log(email, password);
+      await login({email,password})
     },
   });
+
+  useEffect(() => {
+    if(isSuccess) {
+      toast.success("Login successFully")
+      setOpen(false);
+
+    }
+   if(error) {
+    if("data" in error) {
+      const errorData = error as any;
+      toast.error(errorData?.data.message)
+    }
+   }
+  }, [isSuccess,error])
+  
 
   const { errors, touched, values, handleChange, handleSubmit } = formic;
   return (

@@ -1,8 +1,10 @@
-import { FC, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import { ShieldCheck } from "lucide-react";
 import { styles } from "@/styles/style";
 import { cn } from "@/lib/utils";
+import { useSelector } from "react-redux";
+import { useActivationMutation } from "@/redux/features/auth/authApi";
 
 interface VerificationProps {
   setRoute: (route: string) => void;
@@ -18,7 +20,26 @@ type VerifyNumber = {
 };
 
 const Verification: FC<VerificationProps> = ({ setRoute }) => {
+  const {token} = useSelector((state:any) => state.auth);
+  const [activation, {isSuccess,error}] = useActivationMutation();
   const [invalidError, setInvalidError] = useState<boolean>(false);
+
+  useEffect(() => {
+    if(isSuccess) {
+      toast.success("Account activated successfully");
+      setRoute("Login")
+    }
+    if(error) {
+      if("data" in error) {
+         const errorData = error as any;
+         toast.error(errorData.data.message)
+      } else {
+        console.log("An error occured:  ", error)
+      }
+      setInvalidError(true)
+    }
+  },[isSuccess,error])
+
   const [verifyNumbers, setVerifyNumbers] = useState<VerifyNumber>({
     0: "",
     1: "",
@@ -37,8 +58,17 @@ const Verification: FC<VerificationProps> = ({ setRoute }) => {
   ];
 
   const verificationHandler = async () => {
-    setInvalidError(true);
+    const verificationNumber = Object.values(verifyNumbers).join("");
+    console.log("Activation Data",token,verificationNumber)
+    if(verificationNumber.length !== 4) {
+      // setInvalidError(true)
+    }
+    await activation({
+      activation_token:token ,
+      activation_code: verificationNumber
+    });
   };
+  
   const handleInputChange = (index: number, value: string) => {
     setInvalidError(false);
     const newVerifyNumber = {
