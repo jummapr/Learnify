@@ -4,8 +4,9 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { Josefin_Sans } from "next/font/google";
 import { cn } from "@/lib/utils";
-import {Toaster} from "react-hot-toast";
+import { Toaster } from "react-hot-toast";
 import { ReduxProvider } from "./Provider";
+import GlobalSessionProvider from "@/components/provider/session-provider";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -38,17 +39,19 @@ export default function RootLayout({
           "bg-white bg-no-repeat dark:bg-gradient-to-b dark:from-gray-900 dark:to-black duration-300"
         )}
       >
-       <ReduxProvider>
-       <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-          <Toaster position="top-center" reverseOrder={false}/>
-        </ThemeProvider>
-       </ReduxProvider>
+        <ReduxProvider>
+          <GlobalSessionProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+              <Toaster position="top-center" reverseOrder={false} />
+            </ThemeProvider>
+          </GlobalSessionProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

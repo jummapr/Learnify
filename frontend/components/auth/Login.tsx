@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { useLoginMutation } from "@/redux/features/auth/authApi";
 import toast from "react-hot-toast";
+import { signIn } from "next-auth/react";
 
 interface LoginProps {
   setRoute: (route: string) => void;
@@ -111,8 +112,8 @@ const Login: FC<LoginProps> = ({ setRoute, setOpen }) => {
         <h5 className="text-center pt-4 font-Poppins text-[14px] text-black dark:text-white">or Join with</h5>
 
         <div className="flex items-center justify-center my-3">
-            <Image src={"/assets/google.png"} alt={"google"} className="cursor-pointer mr-2" width={40} height={40}/>
-            <Image src={"/assets/social.png"} alt={"github"} className="cursor-pointer ml-2" width={40} height={40}/>
+            <Image src={"/assets/google.png"} alt={"google"} className="cursor-pointer mr-2" width={40} height={40} onClick={() => signIn("google")}/>
+            <Image src={"/assets/social.png"} alt={"github"} className="cursor-pointer ml-2" width={40} height={40} onClick={() => signIn("github")}/>
         </div>
         <h5 className="text-center pt-4 font-Poppins text-[14px]">
             Not have any account?{" "}

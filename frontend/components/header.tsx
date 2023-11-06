@@ -2,13 +2,19 @@
 import { cn } from "@/lib/utils";
 import NavItem from "@/utils/nav-item";
 import Link from "next/link";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { ModeToggle } from "./ModeToggele";
 import { AlignJustify, UserCircle } from "lucide-react";
 import CustomModel from "@/utils/CustomModel";
 import Login from "./auth/Login";
 import SignUp from "./auth/SignUp";
 import Verification from "./auth/Verification";
+import { useSelector } from "react-redux";
+import Image from "next/image";
+import avatar from "/public/assets/avatar.png";
+import { useSession } from "next-auth/react";
+import { useSocialAuthMutation } from "@/redux/features/auth/authApi";
+import toast from "react-hot-toast";
 
 interface HeaderProps {
   open: boolean;
@@ -16,12 +22,39 @@ interface HeaderProps {
   activeItem: number;
   route: string;
   setRoute: (route: string) => void;
-  
 }
 
-const Header: FC<HeaderProps> = ({ activeItem, open, setOpen,route,setRoute}) => {
+const Header: FC<HeaderProps> = ({
+  activeItem,
+  open,
+  setOpen,
+  route,
+  setRoute,
+}) => {
   const [active, setActive] = useState(false);
   const [openSidebar, setOpenSidebar] = useState(false);
+  const { user } = useSelector((state: any) => state.auth);
+  const {data} = useSession();
+  const [socialAuth,{isSuccess,error}]= useSocialAuthMutation();
+  
+
+  useEffect(() => {
+    if(!user) {
+      if(data) {
+        socialAuth({email: data?.user?.email, name: data?.user?.name, image: data?.user?.avatar})
+      }
+    }
+    if (isSuccess) {
+      toast.success("Login successFully")
+      setOpen(false);
+    }
+    if(error) {
+      if("data" in error) {
+        const errorData = error as any;
+        toast.error(errorData?.data.message)
+      }
+    }
+  }, [data,user])
 
   if (typeof window !== "undefined") {
     window.addEventListener("scroll", () => {
@@ -40,6 +73,8 @@ const Header: FC<HeaderProps> = ({ activeItem, open, setOpen,route,setRoute}) =>
       }
     }
   };
+
+  console.log(user);
 
   return (
     <div className="w-full relative">
@@ -71,11 +106,17 @@ const Header: FC<HeaderProps> = ({ activeItem, open, setOpen,route,setRoute}) =>
                   onClick={() => setOpenSidebar(true)}
                 />
               </div>
-              <UserCircle
-                size={25}
-                className="hidden 800px:block cursor-pointer dark:text-white text-black"
-                onClick={() => setOpen(true)}
-              />
+              {user ? (
+                <Link href={"/profile"}>
+                  <Image src={user?.avatar?.url ? user.avatar.url : avatar} alt="logo" width={40} height={40} className="rounded-full cursor-pointer" />
+                </Link>
+              ) : (
+                <UserCircle
+                  size={25}
+                  className="hidden 800px:block cursor-pointer dark:text-white text-black"
+                  onClick={() => setOpen(true)}
+                />
+              )}
             </div>
           </div>
         </div>
@@ -88,10 +129,8 @@ const Header: FC<HeaderProps> = ({ activeItem, open, setOpen,route,setRoute}) =>
             id="screen"
           >
             <div className="w-[70%] fixed z-[999999999] h-screen bg-white dark:bg-slate-900 dark:bg-opacity-90 top-0 right-0">
-              <NavItem 
-                activeItem={activeItem}
-                isMobile={true}
-              />
+              <NavItem activeItem={activeItem} isMobile={true} />
+
               <UserCircle
                 size={25}
                 className="cursor-pointer ml-5 my-2 dark:text-white text-black"
@@ -99,66 +138,54 @@ const Header: FC<HeaderProps> = ({ activeItem, open, setOpen,route,setRoute}) =>
               />
               <br />
               <br />
-              <p className="text-[16px] px-2 pl-5 text-black dark:text-white">Copyright &copy; 2023 Learnify</p>
+              <p className="text-[16px] px-2 pl-5 text-black dark:text-white">
+                Copyright &copy; 2023 Learnify
+              </p>
             </div>
           </div>
         )}
       </div>
-          
 
-          {
-            route === "Login" && (
-              <>
-                {
-                  open && (
-                    <CustomModel 
-                      open={open}
-                      setOpen={setOpen}
-                      setRoute={setRoute}
-                      activeItem={activeItem}
-                      component={Login}
-                    />
-                  )
-                }
-              </>
-            )
-          }
+      {route === "Login" && (
+        <>
+          {open && (
+            <CustomModel
+              open={open}
+              setOpen={setOpen}
+              setRoute={setRoute}
+              activeItem={activeItem}
+              component={Login}
+            />
+          )}
+        </>
+      )}
 
-          {
-            route === "Sign-up" && (
-              <>
-                {
-                  open && (
-                    <CustomModel 
-                      open={open}
-                      setOpen={setOpen}
-                      setRoute={setRoute}
-                      activeItem={activeItem}
-                      component={SignUp}
-                    />
-                  )
-                }
-              </>
-            )
-          }
-          {
-            route === "Verification" && (
-              <>
-                {
-                  open && (
-                    <CustomModel 
-                      open={open}
-                      setOpen={setOpen}
-                      setRoute={setRoute}
-                      activeItem={activeItem}
-                      component={Verification}
-                    />
-                  )
-                }
-              </>
-            )
-          }
-      
+      {route === "Sign-up" && (
+        <>
+          {open && (
+            <CustomModel
+              open={open}
+              setOpen={setOpen}
+              setRoute={setRoute}
+              activeItem={activeItem}
+              component={SignUp}
+            />
+          )}
+        </>
+      )}
+      {route === "Verification" && (
+        <>
+          {open && (
+            <CustomModel
+              open={open}
+              setOpen={setOpen}
+              setRoute={setRoute}
+              activeItem={activeItem}
+              component={Verification}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 };
